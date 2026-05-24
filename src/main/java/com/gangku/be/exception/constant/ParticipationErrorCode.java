@@ -1,0 +1,41 @@
+package com.gangku.be.exception.constant;
+
+import com.gangku.be.exception.ErrorCode;
+import org.springframework.http.HttpStatus;
+
+public enum ParticipationErrorCode implements ErrorCode {
+    ALREADY_JOINED("ALREADY_JOINED", "이미 이 모임에 참여 중입니다.", HttpStatus.CONFLICT.value()),
+    CAPACITY_FULL("CAPACITY_FULL", "모임 정원이 가득 찼습니다.", HttpStatus.CONFLICT.value()),
+    GATHERING_IS_FINISHED("GATHERING_IS_FINISHED", "모임이 종료되었습니다.", HttpStatus.CONFLICT.value()),
+    ALREADY_LEFT("ALREADY_LEFT", "모임 참여 명단에 없는 사용자입니다.", HttpStatus.CONFLICT.value()),
+    HOST_CANNOT_LEAVE("HOST_CANNOT_LEAVE", "모임장은 참여를 취소할 수 없습니다.", HttpStatus.CONFLICT.value()),
+    CANCELLATION_DEADLINE_PASSED(
+            "CANCELLATION_DEADLINE_PASSED",
+            "모임 시작 30분 이내에는 참여를 취소할 수 없습니다.",
+            HttpStatus.FORBIDDEN.value());
+
+    private final String code;
+    private final String message;
+    private final int status;
+
+    ParticipationErrorCode(String code, String message, int status) {
+        this.code = code;
+        this.message = message;
+        this.status = status;
+    }
+
+    @Override
+    public String getCode() {
+        return code;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public int getStatus() {
+        return status;
+    }
+}
