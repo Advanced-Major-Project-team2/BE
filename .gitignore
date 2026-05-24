@@ -1,0 +1,35 @@
+# Build output
+/build/
+/out/
+
+# Gradle
+.gradle/
+build/
+
+# Logs / temp files
+*.log
+logs/
+*.tmp
+
+# Java
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+*.env
+.env.*
+
+redis-data/
+data/
