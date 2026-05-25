@@ -1,6 +1,5 @@
 package com.gangku.be.service;
 
-
 import com.gangku.be.domain.Gathering;
 import com.gangku.be.domain.Review;
 import com.gangku.be.domain.User;
@@ -12,13 +11,13 @@ import com.gangku.be.exception.CustomException;
 import com.gangku.be.exception.constant.GatheringErrorCode;
 import com.gangku.be.exception.constant.ReviewErrorCode;
 import com.gangku.be.exception.constant.UserErrorCode;
-import java.time.LocalDateTime;
 import com.gangku.be.external.ai.AiApiClient;
 import com.gangku.be.repository.GatheringRepository;
 import com.gangku.be.repository.ParticipationRepository;
 import com.gangku.be.repository.ReviewRepository;
 import com.gangku.be.repository.UserRepository;
 import com.gangku.be.util.ai.AiTextFilterMapper;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

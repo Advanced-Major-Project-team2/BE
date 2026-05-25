@@ -197,9 +197,11 @@ public class GatheringService {
         Page<Gathering> gatheringPage =
                 switch (sortType) {
                     case LATEST, POPULAR ->
-                            getNormalGatheringPage(category, sortType, page, size, dateFrom, dateTo);
+                            getNormalGatheringPage(
+                                    category, sortType, page, size, dateFrom, dateTo);
                     case RECOMMEND ->
-                            getRecommendedGatheringPage(userId, category, page, size, dateFrom, dateTo);
+                            getRecommendedGatheringPage(
+                                    userId, category, page, size, dateFrom, dateTo);
                 };
 
         String sortedByForSpec = getSortedByForSpec(sortType);
@@ -242,8 +244,12 @@ public class GatheringService {
     }
 
     private Page<Gathering> getNormalGatheringPage(
-            Category category, GatheringSort sortType, int page, int size,
-            LocalDateTime dateFrom, LocalDateTime dateTo) {
+            Category category,
+            GatheringSort sortType,
+            int page,
+            int size,
+            LocalDateTime dateFrom,
+            LocalDateTime dateTo) {
 
         Sort springSort =
                 switch (sortType) {
@@ -258,11 +264,16 @@ public class GatheringService {
     }
 
     private Page<Gathering> getRecommendedGatheringPage(
-            Long userId, Category category, int page, int size,
-            LocalDateTime dateFrom, LocalDateTime dateTo) {
+            Long userId,
+            Category category,
+            int page,
+            int size,
+            LocalDateTime dateFrom,
+            LocalDateTime dateTo) {
 
         if (userId == null) {
-            return getNormalGatheringPage(category, GatheringSort.LATEST, page, size, dateFrom, dateTo);
+            return getNormalGatheringPage(
+                    category, GatheringSort.LATEST, page, size, dateFrom, dateTo);
         }
 
         User user = findUserById(userId);
@@ -275,13 +286,18 @@ public class GatheringService {
         List<Gathering> candidates = getRecommendationCandidates(category);
 
         if (dateFrom != null) {
-            candidates = candidates.stream()
-                    .filter(g -> !g.getDate().isBefore(dateFrom) && !g.getDate().isAfter(dateTo))
-                    .toList();
+            candidates =
+                    candidates.stream()
+                            .filter(
+                                    g ->
+                                            !g.getDate().isBefore(dateFrom)
+                                                    && !g.getDate().isAfter(dateTo))
+                            .toList();
         }
 
         if (candidates.isEmpty()) {
-            return getNormalGatheringPage(category, GatheringSort.LATEST, page, size, dateFrom, dateTo);
+            return getNormalGatheringPage(
+                    category, GatheringSort.LATEST, page, size, dateFrom, dateTo);
         }
 
         RecommendationRequestDto recommendationRequestDto =
@@ -291,7 +307,8 @@ public class GatheringService {
                 aiApiClient.recommend(recommendationRequestDto).getGatheringsId();
 
         if (recommendedIds == null || recommendedIds.isEmpty()) {
-            return getNormalGatheringPage(category, GatheringSort.LATEST, page, size, dateFrom, dateTo);
+            return getNormalGatheringPage(
+                    category, GatheringSort.LATEST, page, size, dateFrom, dateTo);
         }
 
         return buildRecommendedPage(recommendedIds, page, size);
@@ -410,8 +427,7 @@ public class GatheringService {
 
     private void validateModificationDeadline(Gathering gathering) {
         if (LocalDateTime.now().isAfter(gathering.getDate().minusHours(24))) {
-            throw new CustomException(
-                    GatheringErrorCode.GATHERING_MODIFICATION_DEADLINE_PASSED);
+            throw new CustomException(GatheringErrorCode.GATHERING_MODIFICATION_DEADLINE_PASSED);
         }
     }
 
@@ -450,8 +466,11 @@ public class GatheringService {
     }
 
     private Page<Gathering> getGatheringPage(
-            Category category, GatheringSort sortType, Pageable pageable,
-            LocalDateTime dateFrom, LocalDateTime dateTo) {
+            Category category,
+            GatheringSort sortType,
+            Pageable pageable,
+            LocalDateTime dateFrom,
+            LocalDateTime dateTo) {
         if (dateFrom != null) {
             if (category != null) {
                 return (sortType == GatheringSort.POPULAR)
@@ -496,6 +515,6 @@ public class GatheringService {
                 throw new CustomException(CommonErrorCode.INVALID_REQUEST_PARAMETER);
             }
         }
-        return new LocalDateTime[]{from.atStartOfDay(), to.atTime(23, 59, 59)};
+        return new LocalDateTime[] {from.atStartOfDay(), to.atTime(23, 59, 59)};
     }
 }
