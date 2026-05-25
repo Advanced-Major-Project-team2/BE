@@ -1,64 +1,95 @@
-# BE
+# GangKU - 강쿠 (Backend)
 
-## 브랜치 전략
-- main: 배포용
-- dev: 개발 통합
-- feature/*: 기능 개발 브랜치
+모임을 만들고, 참여하고, 사람들과 연결되는 모임 플랫폼의 백엔드 서버입니다.
 
-##  커밋 컨벤션
+## 기술 스택
 
-#### 1. 커밋 유형 지정
+| 분류 | 기술 |
+|------|------|
+| 프레임워크 | Spring Boot 3.5.6 |
+| 언어 | Java 21 |
+| ORM | Spring Data JPA |
+| 보안 | Spring Security + JWT |
+| 데이터베이스 | MySQL (운영), H2 (로컬/테스트) |
+| 캐시 | Redis |
+| 스토리지 | AWS S3 |
+| HTTP 클라이언트 | Spring WebFlux (WebClient) |
+| 코드 포맷터 | Spotless (Google Java Format) |
 
-| 커밋 유형 | 의미 |
-| --- | --- |
-| `feat` | 새로운 기능 추가 |
-| `fix` | 버그 수정 |
-| `docs` | 문서 수정 |
-| `style` | 코드 formatting, 세미콜론 누락, 코드 자체의 변경이 없는 경우 |
-| `refactor` | 코드 리팩토링 |
-| `test` | 테스트 코드, 리팩토링 테스트 코드 추가 |
-| `chore` | 패키지 매니저 수정, 그 외 기타 수정 ex) .gitignore |
-| `design` | CSS 등 사용자 UI 디자인 변경 |
-| `comment` | 필요한 주석 추가 및 변경 |
-| `rename` | 파일 또는 폴더 명을 수정하거나 옮기는 작업만인 경우 |
-| `remove` | 파일을 삭제하는 작업만 수행한 경우 |
-| `!BREAKING CHANGE` | 커다란 API 변경의 경우 |
-| `!HOTFIX` | 급하게 치명적인 버그를 고쳐야 하는 경우 |
+## 주요 기능
 
-> feat: 로그인 기능 구현
->
-> -Google, Kakao 소셜 로그인 기능 구현 <br>
-> -OAuthProvider 분리 작업 수행
+- **모임** - 모임 생성 / 수정 / 삭제 / 종료 / 상세 조회 / 목록 조회 (날짜 필터)
+- **참여** - 모임 참여 / 취소
+- **리뷰** - 리뷰 작성 / 조회
+- **유저** - 회원가입 / 프로필 조회·수정 / 선호 카테고리 설정
+- **인증** - 이메일 인증 / 로그인 / JWT 기반 인증
+- **AI** - 모임 소개글 자동 생성 / 개인화 추천 / 텍스트 필터링
+- **홈** - 추천 / 최신 / 인기 모임 조회
+- **오브젝트 스토리지** - S3 Presigned URL 발급
 
-#### 2. 제목과 본문을 빈행으로 분리
+## 프로젝트 구조
 
-- 커밋 유형 이후 제목은 영어로 본문은 한글로 작성하여 내용이 잘 전달될 수 있도록 할 것
-- 본문에는 변경한 내용과 이유 설명 (어떻게보다는 무엇 & 왜를 설명)
+```
+src/
+├── main/
+│   ├── java/com/gangku/be/
+│   │   ├── config/       # 설정 (Security, AWS, Redis, AI 등)
+│   │   ├── constant/     # 상수 정의
+│   │   ├── controller/   # REST API 컨트롤러
+│   │   ├── domain/       # JPA 엔티티
+│   │   ├── dto/          # 요청/응답 DTO
+│   │   ├── exception/    # 예외 처리 및 에러 코드
+│   │   ├── external/     # 외부 API 클라이언트 (AI 서버)
+│   │   ├── model/        # 도메인 모델
+│   │   ├── repository/   # JPA 리포지토리
+│   │   ├── service/      # 비즈니스 로직
+│   │   └── util/         # 유틸리티 (JWT, S3, AI 매퍼 등)
+│   └── resources/
+│       ├── application.yml
+│       ├── application-local.yml
+│       └── application-prod.yml
+└── test/                 # 단위 테스트
+```
 
-#### 3. 제목 첫 글자는 대문자로, 끝에는 `.` 금지
+## 시작하기
 
-#### 4. 제목은 영문 기준 50자 이내로 할 것
+### 환경 변수 설정
 
-#### 5. 자신의 코드가 직관적으로 바로 파악할 수 있다고 생각하지 말자
+`.env` 파일을 프로젝트 루트에 생성하여 아래 변수를 설정하세요.
 
-#### 6. 여러가지 항목이 있다면 글머리 기호를 통해 가독성 높이기
+| 변수 | 설명 |
+|------|------|
+| `JWT_SECRET` | JWT 서명 시크릿 키 |
+| `JWT_EXP_MIN` | JWT 만료 시간 (분, 기본값: 60) |
+| `MAIL_HOST` | SMTP 호스트 |
+| `MAIL_PORT` | SMTP 포트 |
+| `MAIL_USERNAME` | SMTP 계정 |
+| `MAIL_PASSWORD` | SMTP 비밀번호 |
+| `MAIL_FROM` | 발신자 이메일 주소 |
+| `S3_IMAGE_BUCKET` | S3 버킷 이름 |
+| `S3_REGION` | S3 리전 |
+| `S3_IMAGE_BASE_PREFIX` | S3 이미지 경로 프리픽스 |
+| `S3_TTL_SECONDS` | Presigned URL 유효 시간 (초) |
+| `CDN_BASE_URL` | CDN 베이스 URL |
 
-## 태그 네이밍(릴리즈 태깅 규칙)
+### 로컬 실행
 
-> v{MAJOR}.{MINOR}.{PATCH}
+```bash
+# 로컬 프로파일로 실행 (H2 DB, 로컬 Redis)
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
 
-- MAJOR: 호환성 깨지는 변경 (ex. API 구조 변경)
+개발 서버: [http://localhost:8080](http://localhost:8080)
 
-- MINOR: 새로운 기능 추가 (하위 호환 유지)
+H2 콘솔: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
 
-- PATCH: 버그 수정, 작은 개선
+로컬 환경에서는 H2 인메모리 DB를 사용하므로 별도의 MySQL 설치가 필요 없습니다.
 
-예시:
+### 빌드
 
-`v0.1.0` → 초기 데모 버전
+```bash
+./gradlew build
+java -jar build/libs/be-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
 
-`v1.0.0` → 정식 서비스 첫 배포
-
-`v1.1.0` → 새로운 기능 추가
-
-`v1.1.1` → 버그 패치
+---
