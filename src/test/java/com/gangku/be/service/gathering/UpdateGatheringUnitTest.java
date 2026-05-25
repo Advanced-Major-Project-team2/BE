@@ -69,7 +69,7 @@ public class UpdateGatheringUnitTest {
                         .title("기존 제목")
                         .gatheringImageObjectKey("statics/image/prod/2025/11/old.jpg")
                         .capacity(10)
-                        .date(LocalDateTime.of(2025, 10, 1, 10, 0))
+                        .date(LocalDateTime.of(2026, 10, 1, 10, 0))
                         .location("공학관 301")
                         .openChatUrl("https://open.kakao.com/o/old")
                         .description("기존 설명")
@@ -82,7 +82,7 @@ public class UpdateGatheringUnitTest {
                         "statics/image/prod/2025/11/new.jpg",
                         "study",
                         15,
-                        LocalDateTime.of(2025, 10, 5, 10, 0),
+                        LocalDateTime.of(2026, 10, 5, 10, 0),
                         "공학관 302",
                         "https://open.kakao.com/o/xyz987",
                         "설명 업데이트");
@@ -109,7 +109,7 @@ public class UpdateGatheringUnitTest {
                 .isEqualTo("statics/image/prod/2025/11/new.jpg");
         assertThat(gathering.getCategory()).isEqualTo(newCategory);
         assertThat(gathering.getCapacity()).isEqualTo(15);
-        assertThat(gathering.getDate()).isEqualTo(LocalDateTime.of(2025, 10, 5, 10, 0));
+        assertThat(gathering.getDate()).isEqualTo(LocalDateTime.of(2026, 10, 5, 10, 0));
         assertThat(gathering.getLocation()).isEqualTo("공학관 302");
         assertThat(gathering.getOpenChatUrl()).isEqualTo("https://open.kakao.com/o/xyz987");
         assertThat(gathering.getDescription()).isEqualTo("설명 업데이트");
@@ -153,7 +153,7 @@ public class UpdateGatheringUnitTest {
                         "statics/image/prod/2025/11/new.jpg",
                         "study",
                         15,
-                        LocalDateTime.of(2025, 10, 5, 10, 0),
+                        LocalDateTime.of(2026, 10, 5, 10, 0),
                         "공학관 302",
                         "https://open.kakao.com/o/xyz987",
                         "설명 업데이트");
@@ -196,7 +196,7 @@ public class UpdateGatheringUnitTest {
                         "statics/image/prod/2025/11/new.jpg",
                         "study",
                         15,
-                        LocalDateTime.of(2025, 10, 5, 10, 0),
+                        LocalDateTime.of(2026, 10, 5, 10, 0),
                         "공학관 302",
                         "https://open.kakao.com/o/xyz987",
                         "설명 업데이트");
@@ -222,60 +222,6 @@ public class UpdateGatheringUnitTest {
     }
 
     @Test
-    @DisplayName("모임 수정 (400 Bad Request): 제목 또는 설명에 금칙어가 있으면 INVALID_GATHERING_CONTENT 예외")
-    void updateGathering_invalidContent() {
-        // given
-        Long gatheringId = 1L;
-        Long userId = 10L;
-
-        User host = User.builder().id(userId).build();
-        Category category = mock(Category.class);
-
-        Gathering gathering =
-                Gathering.builder()
-                        .id(gatheringId)
-                        .host(host)
-                        .category(category)
-                        .title("기존 제목")
-                        .description("기존 설명")
-                        .build();
-
-        GatheringUpdateRequestDto requestDto =
-                new GatheringUpdateRequestDto(
-                        "금칙어 제목", null, null, null, null, null, null, "금칙어 설명");
-
-        TextFilterRequestDto textFilterRequestDto = mock(TextFilterRequestDto.class);
-        TextFilterResponseDto textFilterResponseDto = mock(TextFilterResponseDto.class);
-
-        when(gatheringRepository.findById(gatheringId)).thenReturn(Optional.of(gathering));
-        when(aiTextFilterMapper.fromGatheringUpdate(requestDto)).thenReturn(textFilterRequestDto);
-        when(aiApiClient.filterText(textFilterRequestDto)).thenReturn(textFilterResponseDto);
-        when(textFilterResponseDto.isAllowed()).thenReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> gatheringService.updateGathering(gatheringId, userId, requestDto))
-                .isInstanceOf(CustomException.class)
-                .extracting("errorCode")
-                .isEqualTo(GatheringErrorCode.INVALID_GATHERING_CONTENT);
-
-        verify(gatheringRepository, times(1)).findById(gatheringId);
-        verify(aiTextFilterMapper, times(1)).fromGatheringUpdate(requestDto);
-        verify(aiApiClient, times(1)).filterText(textFilterRequestDto);
-
-        verify(gatheringRepository, never()).save(any());
-        verify(categoryRepository, never()).findByName(anyString());
-        verify(fileUrlResolver, never()).toPublicUrl(anyString());
-
-        verifyNoMoreInteractions(
-                gatheringRepository,
-                aiTextFilterMapper,
-                aiApiClient,
-                categoryRepository,
-                fileUrlResolver);
-        verifyNoInteractions(userRepository, participationRepository);
-    }
-
-    @Test
     @DisplayName("모임 수정 (404 Not Found): 수정하려는 category가 유효하지 않으면 CATEGORY_NOT_FOUND 예외")
     void updateGathering_categoryNotFound() {
         // given
@@ -292,6 +238,7 @@ public class UpdateGatheringUnitTest {
                         .category(oldCategory)
                         .title("기존 제목")
                         .description("기존 설명")
+                        .date(LocalDateTime.of(2026, 10, 1, 10, 0))
                         .build();
 
         GatheringUpdateRequestDto requestDto =

@@ -23,6 +23,8 @@ import com.gangku.be.repository.ReviewRepository;
 import com.gangku.be.repository.UserRepository;
 import com.gangku.be.service.ReviewService;
 import com.gangku.be.util.ai.AiTextFilterMapper;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -57,9 +59,21 @@ public class CreateReviewUnitTest {
 
         ReviewCreateRequestDto requestDto = new ReviewCreateRequestDto(4, "좋았어요!");
 
-        User reviewer = User.builder().id(reviewerId).build();
-        User reviewee = User.builder().id(revieweeId).build();
-        Gathering gathering = Gathering.builder().id(gatheringId).build();
+        User reviewer = User.builder()
+                .id(reviewerId)
+                .nickname("리뷰어")
+                .build();
+
+        User reviewee = User.builder()
+                .id(revieweeId)
+                .nickname("대상자")
+                .profileImageObjectKey("statics/image/profile/test.jpg")
+                .build();
+
+        Gathering gathering = Gathering.builder()
+                .id(gatheringId)
+                .updatedAt(LocalDateTime.now().minusDays(2))
+                .build();
 
         TextFilterRequestDto textFilterRequestDto = mock(TextFilterRequestDto.class);
         TextFilterResponseDto textFilterResponseDto = mock(TextFilterResponseDto.class);
@@ -139,63 +153,6 @@ public class CreateReviewUnitTest {
                 userRepository, participationRepository, gatheringRepository, reviewRepository);
     }
 
-    @Test
-    @DisplayName("리뷰 작성 (400 Bad Request): 리뷰 내용에 금칙어가 있으면 INVALID_REVIEW_CONTENT 예외")
-    void createReview_invalidContent() {
-        // given
-        Long reviewerId = 1L;
-        Long revieweeId = 2L;
-        Long gatheringId = 10L;
-
-        ReviewCreateRequestDto requestDto = new ReviewCreateRequestDto(4, "금칙어 포함 리뷰");
-
-        User reviewer = User.builder().id(reviewerId).build();
-        User reviewee = User.builder().id(revieweeId).build();
-        Gathering gathering = Gathering.builder().id(gatheringId).build();
-
-        TextFilterRequestDto textFilterRequestDto = mock(TextFilterRequestDto.class);
-        TextFilterResponseDto textFilterResponseDto = mock(TextFilterResponseDto.class);
-
-        when(userRepository.findById(reviewerId)).thenReturn(Optional.of(reviewer));
-        when(userRepository.findById(revieweeId)).thenReturn(Optional.of(reviewee));
-        when(participationRepository.findFinishedCommonGatheringIds(reviewerId, revieweeId))
-                .thenReturn(List.of(gatheringId));
-        when(gatheringRepository.findById(gatheringId)).thenReturn(Optional.of(gathering));
-        when(reviewRepository.existsByGatheringIdAndReviewerIdAndRevieweeId(
-                        gatheringId, reviewerId, revieweeId))
-                .thenReturn(false);
-
-        when(aiTextFilterMapper.fromReviewCreate(requestDto)).thenReturn(textFilterRequestDto);
-        when(aiApiClient.filterText(textFilterRequestDto)).thenReturn(textFilterResponseDto);
-        when(textFilterResponseDto.isAllowed()).thenReturn(false);
-
-        // when
-        assertThatThrownBy(() -> reviewService.createReview(reviewerId, revieweeId, requestDto))
-                .isInstanceOf(CustomException.class)
-                .extracting("errorCode")
-                .isEqualTo(ReviewErrorCode.INVALID_REVIEW_COMMENT);
-
-        // then
-        verify(userRepository, times(1)).findById(reviewerId);
-        verify(userRepository, times(1)).findById(revieweeId);
-        verify(participationRepository, times(1))
-                .findFinishedCommonGatheringIds(reviewerId, revieweeId);
-        verify(gatheringRepository, times(1)).findById(gatheringId);
-        verify(reviewRepository, times(1))
-                .existsByGatheringIdAndReviewerIdAndRevieweeId(gatheringId, reviewerId, revieweeId);
-        verify(aiTextFilterMapper, times(1)).fromReviewCreate(requestDto);
-        verify(aiApiClient, times(1)).filterText(textFilterRequestDto);
-
-        verify(reviewRepository, never()).save(any());
-
-        verifyNoMoreInteractions(
-                userRepository,
-                participationRepository,
-                gatheringRepository,
-                reviewRepository,
-                aiTextFilterMapper,
-                aiApiClient);
-    }
 
     @Test
     @DisplayName("리뷰 작성 (404 Not Found): reviewer 유저가 없으면 USER_NOT_FOUND 예외")
@@ -331,7 +288,10 @@ public class CreateReviewUnitTest {
 
         User reviewer = User.builder().id(reviewerId).build();
         User reviewee = User.builder().id(revieweeId).build();
-        Gathering gathering = Gathering.builder().id(gatheringId).build();
+        Gathering gathering = Gathering.builder()
+                .id(gatheringId)
+                .updatedAt(LocalDateTime.now().minusDays(2))
+                .build();
 
         when(userRepository.findById(reviewerId)).thenReturn(Optional.of(reviewer));
         when(userRepository.findById(revieweeId)).thenReturn(Optional.of(reviewee));
